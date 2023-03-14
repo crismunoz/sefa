@@ -3,7 +3,6 @@
 import base64
 import os
 import subprocess
-import cv2
 import numpy as np
 
 import torch
@@ -327,40 +326,6 @@ def parse_image_size(obj):
         raise ValueError(f'Invalid type of input: {type(obj)}!')
 
     return (max(0, width), max(0, height))
-
-
-def encode_image_to_html_str(image, image_size=None):
-    """Encodes an image to html language.
-    NOTE: Input image is always assumed to be with `RGB` channel order.
-    Args:
-        image: The input image to encode. Should be with `RGB` channel order.
-        image_size: This field is used to resize the image before encoding. `0`
-            disables resizing. (default: None)
-    Returns:
-        A string which represents the encoded image.
-    """
-    if image is None:
-        return ''
-
-    assert image.ndim == 3 and image.shape[2] in [1, 3]
-
-    # Change channel order to `BGR`, which is opencv-friendly.
-    image = image[:, :, ::-1]
-
-    # Resize the image if needed.
-    width, height = parse_image_size(image_size)
-    if height or width:
-        height = height or image.shape[0]
-        width = width or image.shape[1]
-        image = cv2.resize(image, (width, height))
-
-    # Encode the image to html-format string.
-    encoded_image = cv2.imencode('.jpg', image)[1].tostring()
-    encoded_image_base64 = base64.b64encode(encoded_image).decode('utf-8')
-    html_str = f'<img src="data:image/jpeg;base64, {encoded_image_base64}"/>'
-
-    return html_str
-
 
 def get_grid_shape(size, row=0, col=0, is_portrait=False):
     """Gets the shape of a grid based on the size.
